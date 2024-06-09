@@ -1,12 +1,9 @@
-@file:Suppress("UNREACHABLE_CODE", "CAST_NEVER_SUCCEEDS")
-
 package com.example.lab8
 
 import WeatherResponse
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-//import android.util.Size
 import androidx.compose.ui.geometry.Size
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,39 +17,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.lab8.ui.theme.SimpleGameTheme
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberStandardBottomSheetState
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-//import fetchWeather
-import kotlin.io.path.Path
-import kotlin.io.path.moveTo
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.sqrt
 import kotlin.random.Random
-//import fetchWeather
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.concurrent.thread
 
 val platforms = ArrayDeque<Pair<Float, Float>>()
 var jumpAp = 0f
@@ -68,18 +52,18 @@ fun GameScreen(tiltSensor: TiltSensor,
     val screenWidthPx = configuration.screenWidthDp * displayMetrics.density
     val screenHeightPx = configuration.screenHeightDp * displayMetrics.density
 
-    var playerX by remember { mutableStateOf(200f) }
-    var playerY by remember { mutableStateOf(screenHeightPx / 2) }
+    var playerX by remember { mutableFloatStateOf(200f) }
+    var playerY by remember { mutableFloatStateOf(screenHeightPx / 2) }
     var xTilt by tiltSensor.xTilt
-    var a by remember { mutableStateOf(0f) }
-    var v by remember { mutableStateOf(0f) }
+    var a by remember { mutableFloatStateOf(0f) }
+    var v by remember { mutableFloatStateOf(0f) }
 
-    var jumpV by remember { mutableStateOf(0f) }
-    var jumpA by remember { mutableStateOf(270f) }
-    val g by remember { mutableStateOf(9.8f) }
+    var jumpV by remember { mutableFloatStateOf(0f) }
+    var jumpA by remember { mutableFloatStateOf(270f) }
+    val g by remember { mutableFloatStateOf(9.8f) }
     var yCord = screenHeightPx / 2 + 60f
-    var curPlatf by remember { mutableStateOf(yCord - 600f) }
-    var record by remember { mutableStateOf(0) }
+    var curPlatf by remember { mutableFloatStateOf(yCord - 600f) }
+    var record by remember { mutableIntStateOf(0) }
 
     var isGamePaused by remember { mutableStateOf(false) }
 
@@ -99,7 +83,7 @@ fun GameScreen(tiltSensor: TiltSensor,
         if (platforms.isNotEmpty()) {
             platforms.removeFirst()
         } else {
-            println("Стек пуст.")
+            println("Stack is empty")
         }
     }
 
@@ -472,18 +456,26 @@ fun AddHighScoreDialog(score: Int, dbHelper: RecordDatabaseHelper, onDismiss: ()
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        val records = dbHelper.getTop5Records()
-                        if (records.size == 5) {
-                            dbHelper.removeLowestRecord()
-                        }
-                        dbHelper.insertRecord(score, name.text)
-                        onDismiss()
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text("Save")
+                Row (modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    Button(
+                        onClick = {
+                            val records = dbHelper.getTop5Records()
+                            if (records.size == 5) {
+                                dbHelper.removeLowestRecord()
+                            }
+                            dbHelper.insertRecord(score, name.text)
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(2f)
+                    ) {
+                        Text(text = "Save")
+                    }
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(2f)) {
+                        Text(text = "Cancel")
+                    }
                 }
             }
         }
