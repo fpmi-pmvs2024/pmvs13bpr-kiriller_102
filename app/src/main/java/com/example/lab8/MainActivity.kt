@@ -3,7 +3,6 @@ package com.example.lab8
 import WeatherResponse
 import android.app.Activity
 import android.graphics.BitmapFactory
-import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.ui.geometry.Size
@@ -25,12 +24,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -75,8 +77,11 @@ fun GameScreen(tiltSensor: TiltSensor,
     var weatherResponse by remember { mutableStateOf<WeatherResponse?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var color by remember { mutableStateOf(Color(57, 112, 196, 255)) }
+    val backgroundWarmPainter: Painter = painterResource(id = R.drawable.background_warm)
+    val backgroundColdPainter: Painter = painterResource(id = R.drawable.background_clod)
     var showAddHighScoreDialog by remember { mutableStateOf(true) }
     var isRainy by remember { mutableStateOf(false) }
+    var isWarm by remember { mutableStateOf(true) }
 
 
     fun addRandomPlatform(y: Float) {
@@ -101,11 +106,7 @@ fun GameScreen(tiltSensor: TiltSensor,
             val result = fetchWeather("Minsk", "35f8f1c7f56f0fdf44f56c489b1dd616")
             weatherResponse = result
             isLoading = false
-            color = if ((result?.main?.temp?.minus(273.15)?.toInt() ?: 0) > 15) {
-                Color.Yellow
-            } else {
-                Color.Blue
-            }
+            isWarm = (result?.main?.temp?.minus(273.15)?.toInt() ?: 0) > 15
             if (result?.main?.humidity!! > 70) {
                 isRainy = true
             }
@@ -172,7 +173,10 @@ fun GameScreen(tiltSensor: TiltSensor,
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color)
+//            .background(color)
+            .paint(
+                painter = if(isWarm) {backgroundWarmPainter} else {backgroundColdPainter},
+                contentScale = ContentScale.FillHeight)
     ) {
         Text(text = "$record",
             fontSize = 20.sp,
@@ -188,8 +192,8 @@ fun GameScreen(tiltSensor: TiltSensor,
         }
 
         Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(color = Color(69, 182, 4, 255),
-                topLeft = Offset(x = 0f, y = yCord))
+            drawRect(color = Color(129, 192, 93, 255),
+                topLeft = Offset(x = 0f, y = yCord - 10))
             drawCircle(color = Color.Cyan,
                 radius = 50f,
                 center = Offset(playerX - screenWidthPx, playerY))
