@@ -103,7 +103,7 @@ fun GameScreen(tiltSensor: TiltSensor,
         curPlatf = yCord - 600f
 
         try {
-            val result = fetchWeather("Minsk", "35f8f1c7f56f0fdf44f56c489b1dd616")
+            val result = fetchWeather("Norilsk", "35f8f1c7f56f0fdf44f56c489b1dd616")
             weatherResponse = result
             isLoading = false
             isWarm = (result?.main?.temp?.minus(273.15)?.toInt() ?: 0) > 15
@@ -194,17 +194,31 @@ fun GameScreen(tiltSensor: TiltSensor,
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawRect(color = Color(129, 192, 93, 255),
                 topLeft = Offset(x = 0f, y = yCord - 10))
-            drawCircle(color = Color.Cyan,
-                radius = 50f,
-                center = Offset(playerX - screenWidthPx, playerY))
-            drawCircle(color = Color.Cyan,
-                radius = 50f,
-                center = Offset(playerX + screenWidthPx, playerY))
-            drawCircle(
-                color = Color.Cyan,
-                radius = 50f,
-                center = Offset(playerX, playerY)
+            val player = BitmapFactory.decodeResource(context.resources,
+                R.drawable.player).asImageBitmap()
+            drawImage(
+                image = player,
+                topLeft = Offset(playerX - 60f, playerY - 120f)
             )
+            drawImage(
+                image = player,
+                topLeft = Offset(playerX + screenWidthPx - 60f, playerY - 120f)
+            )
+            drawImage(
+                image = player,
+                topLeft = Offset(playerX - screenWidthPx - 60f, playerY - 120f)
+            )
+//            drawCircle(color = Color.Cyan,
+//                radius = 50f,
+//                center = Offset(playerX - screenWidthPx, playerY))
+//            drawCircle(color = Color.Cyan,
+//                radius = 50f,
+//                center = Offset(playerX + screenWidthPx, playerY))
+//            drawCircle(
+//                color = Color.Cyan,
+//                radius = 50f,
+//                center = Offset(playerX, playerY)
+//            )
             for (i in 0..4) {
 
                 val cloudBitmap = BitmapFactory.decodeResource(context.resources,
