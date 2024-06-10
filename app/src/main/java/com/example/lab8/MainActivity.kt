@@ -2,6 +2,8 @@ package com.example.lab8
 
 import WeatherResponse
 import android.app.Activity
+import android.graphics.BitmapFactory
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.ui.geometry.Size
@@ -24,6 +26,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +44,7 @@ import kotlinx.coroutines.withContext
 
 val platforms = ArrayDeque<Pair<Float, Float>>()
 var jumpAp = 0f
+
 @Composable
 fun GameScreen(tiltSensor: TiltSensor,
                onPause: () -> Unit,
@@ -71,6 +76,7 @@ fun GameScreen(tiltSensor: TiltSensor,
     var isLoading by remember { mutableStateOf(true) }
     var color by remember { mutableStateOf(Color(57, 112, 196, 255)) }
     var showAddHighScoreDialog by remember { mutableStateOf(true) }
+    var isRainy by remember { mutableStateOf(false) }
 
 
     fun addRandomPlatform(y: Float) {
@@ -100,6 +106,9 @@ fun GameScreen(tiltSensor: TiltSensor,
             } else {
                 Color.Blue
             }
+            if (result?.main?.humidity!! > 70) {
+                isRainy = true
+            }
         } catch (e: Exception) {
             Log.e("GameScreen", "Error fetching weather", e)
         }
@@ -116,20 +125,20 @@ fun GameScreen(tiltSensor: TiltSensor,
     record = max(record, ((yCord - 300) / 600).toInt() - 2)
 
     if (yCord < (screenHeightPx / 2 + 60f) ||
-        (abs(playerX - platforms.elementAt(0).first - 75f) <= 75f
+        (abs(playerX - platforms.elementAt(0).first - 80f) <= 130f
                 && abs(yCord - platforms.elementAt(0).second - playerY) <= 20f
                 && jumpA < 0)
         ||
-        (abs(playerX - platforms.elementAt(1).first - 75f) <= 75f
+        (abs(playerX - platforms.elementAt(1).first - 80f) <= 130f
                 && abs(yCord - platforms.elementAt(1).second - playerY) <= 20f
                 && jumpA < 0)
-        || (abs(playerX - platforms.elementAt(2).first - 75f) <= 75f
+        || (abs(playerX - platforms.elementAt(2).first - 80f) <= 130f
                 && abs(yCord - platforms.elementAt(2).second - playerY) <= 20f
                 && jumpA < 0)
-        || (abs(playerX - platforms.elementAt(3).first - 75f) <= 75f
+        || (abs(playerX - platforms.elementAt(3).first - 80f) <= 130f
                 && abs(yCord - platforms.elementAt(3).second - playerY) <= 20f
                 && jumpA < 0)
-        || (abs(playerX - platforms.elementAt(4).first - 75f) <= 75f
+        || (abs(playerX - platforms.elementAt(4).first - 80f) <= 130f
                 && abs(yCord - platforms.elementAt(4).second - playerY) <= 20f
                 && jumpA < 0)
     ){
@@ -183,21 +192,39 @@ fun GameScreen(tiltSensor: TiltSensor,
                 topLeft = Offset(x = 0f, y = yCord))
             drawCircle(color = Color.Cyan,
                 radius = 50f,
-                center = androidx.compose.ui.geometry.Offset(playerX - screenWidthPx, playerY))
+                center = Offset(playerX - screenWidthPx, playerY))
             drawCircle(color = Color.Cyan,
                 radius = 50f,
-                center = androidx.compose.ui.geometry.Offset(playerX + screenWidthPx, playerY))
+                center = Offset(playerX + screenWidthPx, playerY))
             drawCircle(
                 color = Color.Cyan,
                 radius = 50f,
-                center = androidx.compose.ui.geometry.Offset(playerX, playerY)
+                center = Offset(playerX, playerY)
             )
             for (i in 0..4) {
-                drawRect(color = Color.White,
-                    topLeft = Offset(
-                        platforms.elementAt(i).first,
-                        yCord - platforms.elementAt(i).second),
-                    size = androidx.compose.ui.geometry.Size(width = 150f, height = 30f))
+
+                val cloudBitmap = BitmapFactory.decodeResource(context.resources,
+                    R.drawable.cloud).asImageBitmap()
+                val rainBitmap = BitmapFactory.decodeResource(context.resources,
+                    R.drawable.rain).asImageBitmap()
+
+                if(isRainy) {
+                    drawImage(
+                        image = rainBitmap,
+                        topLeft = Offset(
+                            platforms.elementAt(i).first,
+                            yCord - platforms.elementAt(i).second
+                        )
+                    )
+                } else {
+                    drawImage(
+                        image = cloudBitmap,
+                        topLeft = Offset(
+                            platforms.elementAt(i).first,
+                            yCord - platforms.elementAt(i).second
+                        )
+                    )
+                }
             }
         }
         Canvas(modifier = Modifier
